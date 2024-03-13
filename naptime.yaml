@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: naptime
+spec:
+  params:
+    - name: hours
+      default: '2'
+  tasks:
+  - name: sleep
+    timeout: "2h0m0s"
+    params:
+      - name: hours
+        value: $(params.hours)
+    taskSpec:
+      params:
+        - name: hours
+          type: string
+      steps:
+        - name: sleep
+          image: registry.access.redhat.com/ubi9/ubi-micro
+          script: |
+            echo "**********************"
+            echo "Sleeping for $(params.hours) hours"
+            sleep "$(params.hours)h"
+            echo "**********************"
