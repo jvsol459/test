@@ -1,0 +1,66 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: daily-routine
+spec:
+  params:
+    - name: work
+      default: '8h'
+    - name: decompress
+      default: '8h'
+    - name: sleep
+      default: '8h'
+  tasks:
+  - name: work
+    timeout: "8h0m0s"
+    params:
+      - name: duration
+        value: $(params.work)
+    taskSpec:
+      params:
+        - name: duration
+          type: string
+      steps:
+        - name: sleep
+          image: registry.access.redhat.com/ubi9/ubi-micro
+          script: |
+            echo "**********************"
+            echo "Working for $(params.duration)"
+            sleep "$(params.duration)"
+            echo "**********************"
+  - name: decompress
+    timeout: "8h0m0s"
+    runAfter: [work]
+    params:
+      - name: duration
+        value: $(params.decompress)
+    taskSpec:
+      params:
+        - name: duration
+          type: string
+      steps:
+        - name: sleep
+          image: registry.access.redhat.com/ubi9/ubi-micro
+          script: |
+            echo "**********************"
+            echo "Relaxing for $(params.duration)"
+            sleep "$(params.duration)"
+            echo "**********************"
+  - name: sleep
+    timeout: "8h0m0s"
+    runAfter: [decompress]
+    params:
+      - name: duration
+        value: $(params.sleep)
+    taskSpec:
+      params:
+        - name: duration
+          type: string
+      steps:
+        - name: sleep
+          image: registry.access.redhat.com/ubi9/ubi-micro
+          script: |
+            echo "**********************"
+            echo "Sleeping for $(params.duration)"
+            sleep "$(params.duration)"
+            echo "**********************"
